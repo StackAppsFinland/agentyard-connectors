@@ -21,7 +21,7 @@ Prompting a session writes into the shared session store, so it lands in the
 same conversation the user sees in Devin Desktop.
 
 See `docs/devin-acp-findings.md` for the feasibility evidence, auth model, and
-known gaps.
+known gaps. See `docs/phone-app-next-steps.md` for the iPhone app work plan.
 
 ## Usage
 
