@@ -7,6 +7,9 @@ Founder context that shapes the plan: primary dev machine is a **Mac**, so
 local iOS builds via Xcode are available — EAS Build is optional, not
 required. Apple Developer account, certs, and TestFlight access exist.
 
+**For the concrete runbook (commands to type on the Mac), see
+`mac-getting-started.md`.**
+
 ## Repo
 
 New repo/package: `agentyard` (dir `C:\Code\Stackapps\agentyard` already
