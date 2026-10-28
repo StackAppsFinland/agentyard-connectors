@@ -114,19 +114,23 @@ Fixture-driven first: hardcoded `TabInfo[]`/transcript shaped exactly like
 with `@react-native-async-storage/async-storage`. Unit tests for the store +
 components (project rule: always add unit tests).
 
-## 6. M3 — the LAN round trip (the real milestone)
+## 6. M3 — the LAN round trip (implemented, verified on Mac)
 
 Goal: prompt typed on the phone lands in a real Devin tab; streamed reply
-visible on both.
+visible on both. **Done**: the companion lives in `src/server/` (WS on
+`0.0.0.0:4000` by default, pairing code printed on start) — verified
+end-to-end via `node scripts/e2e-companion.mjs` and the app's own
+`CompanionClient` (`AGENTYARD_LIVE=… npx vitest run live` in agentyard).
 
-1. Companion endpoint (new package, e.g. `agentyard-connectors/src/server/`
-   or separate `agentyard-companion`): HTTP + WebSocket on `0.0.0.0:4000`,
-   wrapping `DevinConnector` per the endpoints listed in
-   `phone-app-next-steps.md` §4. Auth = shared short code it prints on start.
-2. On the Windows Devin box: `npm run build`, run the server.
-3. iPhone on same Wi-Fi: Settings → enter `http://<windows-ip>:4000` + code.
-4. Phone app calls `/workspaces` → `/sessions` → `/sessions/:id/prompt`.
-   Verify the turn appears in Devin Desktop on the PC.
+1. On the Devin box: `npm run companion -- --workspace <cwd>` (repeat
+   `--workspace` per Devin cwd; prints `ws://<ip>:<port>` + code).
+2. iPhone on same Wi-Fi: gear icon → Settings → enter `ws` address + code.
+3. Phone app ops: `hello` → `tabs` → `prompt` (streamed). Verify the turn
+   appears in Devin Desktop.
+
+Protocol = `src/server/protocol.ts` (WS JSON, not the REST sketch from
+`phone-app-next-steps.md` §4 — semantics match, `/workspaces` is inside
+`hello`).
 
 Only after this works does the hosted relay (Rust/Axum, plan M5) buy us
 cellular/off-LAN control.
@@ -140,8 +144,10 @@ cellular/off-LAN control.
 - `session/list` is `cwd`-scoped: the companion should expose the Devin
   workspaces it knows (e.g. `C:\Code\Stackapps`) rather than letting the
   phone guess.
-- Locked tabs (`isLocked`) are open in the IDE — prompting them is untested;
-  watch behaviour in M3 and document.
+- Locked tabs (`isLocked`) are open in the IDE — verified on Mac: `session/load`
+  fails with "Session '<id>' is already open in another process (PID …)", so
+  reading or prompting them fails. Phone UX should mark them "open in Devin"
+  and treat them as unavailable until closed there.
 - Devin auth: connector `authenticate(devin-browser)` silently reused the
   login here; on a fresh Devin install expect a browser prompt on first
   connect — fine on a desktop companion, just document it.

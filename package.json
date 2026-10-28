@@ -17,7 +17,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "companion": "npm run build && node dist/server/run.js"
   },
   "engines": {
     "node": ">=20"
@@ -25,7 +26,11 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@types/node": "^24.19.2",
+    "@types/ws": "^8.18.2",
     "typescript": "^5.9.3",
     "vitest": "^3.2.7"
+  },
+  "dependencies": {
+    "ws": "^8.22.0"
   }
 }

@@ -58,13 +58,34 @@ connector), not local CLI credentials:
 - `skipAuth: true`: listing sessions works unauthenticated; load/prompt will
   fail with `Authentication required`
 
+## Companion server (phone app ↔ connector bridge)
+
+`src/server/` wraps the connector in a WebSocket endpoint the AgentYard
+phone app talks to over the LAN (the phone never speaks ACP):
+
+```bash
+npm run companion -- --workspace "C:\Code\Stackapps" [--workspace label=cwd ...]
+# or: node dist/server/run.js -w <cwd> -p 4000 --code 123456
+```
+
+It prints a 6-digit pairing code + LAN `ws://` addresses. Protocol v1:
+`hello`+code first, then `tabs`/`transcript`/`prompt` (streams
+`prompt_event`s)/`createTab`/`deleteTab`/`cancel`/`permission`; every request
+gets a matching `ok`/`error` by `id`. Schema: `src/server/protocol.ts`
+(mirrored into the app at `agentyard/src/protocol.ts`). Also serves
+`GET /health` for probes.
+
+Verify without a phone: `node scripts/e2e-companion.mjs [port] [code]`
+(hello → tabs → createTab → streamed prompt → transcript → deleteTab,
+against the real Devin install).
+
 ## Develop
 
 ```bash
 npm install
 npm run build       # tsc -> dist/
 npm test            # vitest (unit tests, no Devin needed)
-node scripts/e2e-devin.mjs   # live round-trip against the local Devin install
+node scripts/e2e-devin.mjs   # live connector round-trip (adjust CWD inside for your OS)
 ```
 
 `scripts/acp-probe*.mjs` are raw protocol probes used during the feasibility
@@ -76,7 +97,8 @@ spike — kept for debugging.
 src/acp/        NDJSON JSON-RPC peer, typed ACP client, process spawner
 src/devin/      binary locator, DevinConnector (tab ops), transcript builder
 src/connector/  public types: TabInfo, TabEvent, errors
+src/server/     companion WebSocket server + wire protocol + CLI (run.js)
 docs/           feasibility findings
-scripts/        probes + live e2e
+scripts/        probes + live e2e (connector + companion)
 test/           vitest unit tests
 ```
